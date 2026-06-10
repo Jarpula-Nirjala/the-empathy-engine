@@ -6,6 +6,7 @@ Detects emotion from text and generates emotionally modulated AI speech.
 
 import logging
 import os
+import threading
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -41,32 +42,63 @@ logger = logging.getLogger(__name__)
 STATIC_DIR = Path(__file__).parent / "static"
 ssml_builder = SSMLBuilder()
 
+# Background startup state (model loads async so Render health checks pass quickly)
+_startup = {"done": False, "error": None, "loading": False}
+
+
+def _init_services() -> None:
+    """Load NLTK, emotion model, and voice modulator in a background thread."""
+    global _startup
+    try:
+        AUDIO_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        STATIC_DIR.mkdir(parents=True, exist_ok=True)
+
+        logger.info("Downloading NLTK punkt tokenizer...")
+        try:
+            nltk.download("punkt", quiet=True)
+            nltk.download("punkt_tab", quiet=True)
+        except Exception as exc:
+            logger.warning("NLTK download issue (may retry on demand): %s", exc)
+
+        logger.info("Loading emotion model (~250 MB on first run)...")
+        detector = get_detector()
+        if detector.model_loaded:
+            backend = "transformers" if detector.using_transformers else "VADER"
+            logger.info("Emotion detector ready (backend: %s).", backend)
+        else:
+            logger.error("Emotion detector failed to initialize.")
+
+        get_modulator()
+        logger.info("Voice modulator ready.")
+        _startup["done"] = True
+    except Exception as exc:
+        logger.exception("Startup failed")
+        _startup["error"] = str(exc)
+    finally:
+        _startup["loading"] = False
+
+
+def _require_ready() -> None:
+    """Raise 503 if background startup has not finished."""
+    if _startup["error"]:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Service unavailable: {_startup['error']}",
+        )
+    if not _startup["done"]:
+        raise HTTPException(
+            status_code=503,
+            detail="Model is still loading. Please retry in 30–60 seconds.",
+        )
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup: create directories, download NLTK data, warm up models."""
-    AUDIO_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    STATIC_DIR.mkdir(parents=True, exist_ok=True)
-
-    logger.info("Downloading NLTK punkt tokenizer...")
-    try:
-        nltk.download("punkt", quiet=True)
-        nltk.download("punkt_tab", quiet=True)
-    except Exception as exc:
-        logger.warning("NLTK download issue (may retry on demand): %s", exc)
-
-    logger.info(
-        "Initializing The Empathy Engine — emotion model may download ~250 MB on first run."
-    )
-    detector = get_detector()
-    if detector.model_loaded:
-        backend = "transformers" if detector.using_transformers else "VADER"
-        logger.info("Emotion detector ready (backend: %s).", backend)
-    else:
-        logger.error("Emotion detector failed to initialize.")
-
-    get_modulator()
-    logger.info("Voice modulator ready. Server is live.")
+    """Start model loading in background; accept HTTP immediately."""
+    _startup["loading"] = True
+    thread = threading.Thread(target=_init_services, daemon=True)
+    thread.start()
+    logger.info("Background startup started — /health available immediately.")
     yield
     logger.info("Shutting down The Empathy Engine.")
 
@@ -172,6 +204,7 @@ async def serve_index():
 @app.post("/analyze")
 async def analyze_text(request: TextRequest):
     """Analyze text for emotions without generating audio."""
+    _require_ready()
     try:
         start = time.perf_counter()
         response = _build_analysis_response(request.text)
@@ -189,6 +222,7 @@ async def analyze_text(request: TextRequest):
 @app.post("/generate")
 async def generate_audio(request: GenerateRequest):
     """Detect emotion and generate modulated speech audio."""
+    _require_ready()
     try:
         start = time.perf_counter()
         detector = get_detector()
@@ -247,6 +281,7 @@ async def generate_audio(request: GenerateRequest):
 @app.post("/compare")
 async def compare_voices(request: TextRequest):
     """Generate emotional and flat/neutral audio for side-by-side comparison."""
+    _require_ready()
     try:
         start = time.perf_counter()
         detector = get_detector()
@@ -305,7 +340,19 @@ async def serve_audio(filename: str):
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    """Health check — always returns 200 so Render deploy succeeds while model loads."""
+    if _startup["error"]:
+        return {
+            "status": "error",
+            "model_loaded": False,
+            "detail": _startup["error"],
+        }
+    if not _startup["done"]:
+        return {
+            "status": "starting",
+            "model_loaded": False,
+            "loading": _startup["loading"],
+        }
     detector = get_detector()
     return {
         "status": "ok",

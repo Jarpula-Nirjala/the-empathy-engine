@@ -1,0 +1,5 @@
+# Force Unix line endings for Docker/Linux deployment
+Dockerfile text eol=lf
+docker-entrypoint.sh text eol=lf
+build.sh text eol=lf
+*.py text eol=lf
