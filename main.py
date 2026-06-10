@@ -96,11 +96,18 @@ def _require_ready() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Start model loading in background; accept HTTP immediately."""
-    _startup["loading"] = True
-    thread = threading.Thread(target=_init_services, daemon=True)
-    thread.start()
-    logger.info("Background startup started — /health available immediately.")
+    """Start services — sync for VADER (fast), background for transformers (heavy)."""
+    vader_only = os.getenv("USE_VADER_ONLY", "").lower() in ("1", "true", "yes")
+
+    if vader_only:
+        _startup["loading"] = True
+        _init_services()
+        logger.info("VADER mode — startup complete.")
+    else:
+        _startup["loading"] = True
+        thread = threading.Thread(target=_init_services, daemon=True)
+        thread.start()
+        logger.info("Background startup started — /health available immediately.")
     yield
     logger.info("Shutting down The Empathy Engine.")
 

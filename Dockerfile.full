@@ -1,6 +1,5 @@
-# Default Dockerfile — works on Render Free tier (512 MB)
-# Same professional UI. VADER emotion backend (no PyTorch).
-# For full DistilRoBERTa: use Dockerfile.full + Standard plan (2 GB).
+# Full AI image — DistilRoBERTa + PyTorch (~2 GB RAM required)
+# Use on Render Standard plan or higher. NOT for Free tier.
 
 FROM python:3.11-slim-bookworm
 
@@ -9,17 +8,23 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    USE_VADER_ONLY=true \
+    USE_VADER_ONLY=false \
+    HF_HOME=/app/.cache/huggingface \
+    TRANSFORMERS_CACHE=/app/.cache/huggingface \
     NLTK_DATA=/app/.cache/nltk \
+    TOKENIZERS_PARALLELISM=false \
+    OMP_NUM_THREADS=1 \
     PORT=8000
 
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements-vader.txt requirements.txt
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY requirements.txt .
+RUN pip install --upgrade pip \
+    && pip install torch --index-url https://download.pytorch.org/whl/cpu \
+    && pip install -r requirements.txt
 
-RUN mkdir -p /app/.cache/nltk /app/audio_output \
+RUN mkdir -p /app/.cache/nltk /app/.cache/huggingface /app/audio_output \
     && python -c "import nltk; nltk.download('punkt', download_dir='/app/.cache/nltk'); nltk.download('punkt_tab', download_dir='/app/.cache/nltk')"
 
 COPY main.py emotion_detector.py emotion_voice_map.py voice_modulator.py ssml_builder.py ./

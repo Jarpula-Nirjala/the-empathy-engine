@@ -1,5 +1,4 @@
-# Render Blueprint — Free tier (512 MB) — professional UI + VADER backend
-# For full DistilRoBERTa AI: change dockerfilePath to Dockerfile and plan to standard
+# Render — default uses Dockerfile (Free tier safe, VADER backend)
 
 services:
   - type: web
@@ -8,7 +7,7 @@ services:
     region: oregon
     plan: free
     branch: main
-    dockerfilePath: Dockerfile.free
+    dockerfilePath: Dockerfile
     dockerContext: .
     healthCheckPath: /health
     autoDeploy: true
@@ -19,5 +18,3 @@ services:
         value: "true"
       - key: NLTK_DATA
         value: /app/.cache/nltk
-      - key: LOG_LEVEL
-        value: INFO
