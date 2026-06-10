@@ -193,6 +193,7 @@ def _build_analysis_response(text: str) -> dict[str, Any]:
 
 
 @app.get("/")
+@app.head("/")
 async def serve_index():
     """Serve the single-page frontend."""
     index_path = STATIC_DIR / "index.html"
