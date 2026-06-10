@@ -96,8 +96,9 @@ sudo apt update && sudo apt install ffmpeg
 
 2. **Install Python dependencies**
    ```bash
-   pip install -r requirements.txt
+   pip install -r requirements-local.txt
    ```
+   Or on Render/production, use `requirements.txt` (torch is installed via Docker/build script).
 
 3. **Download NLTK punkt tokenizer**
    ```bash
@@ -114,6 +115,43 @@ sudo apt update && sudo apt install ffmpeg
    Navigate to [http://localhost:8000](http://localhost:8000)
 
 > **Note:** On first run, the HuggingFace emotion model (~250 MB) downloads automatically. You'll see a startup message in the terminal — please wait for it to complete before making requests.
+
+## Deploy on Render
+
+This repo includes everything needed for [Render](https://render.com) deployment.
+
+### One-click Blueprint (recommended)
+
+1. Push this repo to GitHub (already at [Jarpula-Nirjala/the-empathy-engine](https://github.com/Jarpula-Nirjala/the-empathy-engine)).
+2. Go to [Render Dashboard](https://dashboard.render.com/) → **New** → **Blueprint**.
+3. Connect GitHub and select `Jarpula-Nirjala/the-empathy-engine`.
+4. Render reads `render.yaml` and creates the web service automatically.
+5. Click **Apply** and wait for the Docker build (~10–15 min first time — model is baked into the image).
+
+### Manual Web Service setup
+
+| Setting | Value |
+|---------|--------|
+| **Environment** | Docker |
+| **Branch** | `main` |
+| **Dockerfile path** | `./Dockerfile` |
+| **Plan** | **Standard (2 GB RAM)** minimum |
+| **Health check path** | `/health` |
+
+### Important notes
+
+- **RAM:** DistilRoBERTa + PyTorch needs **≥ 2 GB RAM**. Free/Starter (512 MB) will crash. Use **Standard** plan ($25/mo) or higher.
+- **First deploy:** Docker build pre-downloads the emotion model so startup is faster.
+- **Internet:** gTTS requires outbound HTTPS to Google at runtime.
+- **Live URL:** After deploy, open `https://the-empathy-engine.onrender.com` (or your assigned Render URL).
+
+### Verify deployment
+
+```bash
+curl https://YOUR-SERVICE.onrender.com/health
+```
+
+Expected: `{"status":"ok","model_loaded":true,"backend":"transformers"}`
 
 ## API Endpoints
 

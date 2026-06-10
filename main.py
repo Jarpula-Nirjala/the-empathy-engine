@@ -5,6 +5,7 @@ Detects emotion from text and generates emotionally modulated AI speech.
 """
 
 import logging
+import os
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -24,6 +25,12 @@ from ssml_builder import SSMLBuilder
 from voice_modulator import AUDIO_OUTPUT_DIR, get_modulator
 
 load_dotenv()
+
+# Respect Render / Docker cache paths for NLTK
+_nltk_data = os.getenv("NLTK_DATA")
+if _nltk_data:
+    import nltk as _nltk_mod
+    _nltk_mod.data.path.append(_nltk_data)
 
 logging.basicConfig(
     level=logging.INFO,
