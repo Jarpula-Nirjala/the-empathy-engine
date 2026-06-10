@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="The Empathy Engine — Professional AI platform that detects emotion from text and generates expressive, emotionally-modulated speech." />
+  <title>The Empathy Engine · Professional AI Emotional Speech Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <link rel="stylesheet" href="/assets/css/pro.css" />
+</head>
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <canvas id="particle-canvas"></canvas>
+  <canvas id="emoji-canvas"></canvas>
+  <div class="bg-mesh"></div>
+  <div class="floating-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+  </div>
+
+  <div class="app-wrap">
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+      <div class="navbar-inner">
+        <a href="#" class="nav-brand">The Empathy Engine</a>
+        <div class="nav-links">
+          <a href="#studio" class="nav-link">Studio</a>
+          <a href="#analysis-section" class="nav-link">Analysis</a>
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#how-it-works" class="nav-link">Pipeline</a>
+          <a href="#faq" class="nav-link">FAQ</a>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="status-pill">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-label">Connecting...</span>
+          </div>
+          <button id="btn-demo" class="pick-btn">Run Demo</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero reveal">
+      <div class="hero-badge">✦ Enterprise-Grade Emotion AI Platform</div>
+      <div class="hero-waveform">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <h1 class="hero-title">The Empathy Engine</h1>
+      <div class="hero-typed" id="hero-typed"></div>
+      <p class="hero-sub">
+        Transform text into speech that truly feels. Our AI detects seven distinct emotions
+        and modulates voice in real time — speed, pitch, volume, and rhythm.
+      </p>
+
+      <div class="feature-pills">
+        <span class="pill">7-Emotion Transformer</span>
+        <span class="pill">Voice Modulation</span>
+        <span class="pill">A/B Compare</span>
+        <span class="pill">Analytics Dashboard</span>
+        <span class="pill">Live Waveform</span>
+        <span class="pill">SSML Engine</span>
+        <span class="pill">Emotion Override</span>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num" id="stat-analyses">0</div>
+          <div class="stat-label">Analyses Run</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="stat-generations">0</div>
+          <div class="stat-label">Voices Created</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="stat-top" style="font-size:1.35rem">—</div>
+          <div class="stat-label">Top Emotion</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 pb-16 space-y-10">
+
+      <!-- Studio / Input -->
+      <section id="studio" class="glass glass-glow p-6 md:p-8 reveal active">
+        <div class="section-header" style="text-align:left;margin-bottom:1.5rem">
+          <span class="section-tag">Emotion Studio</span>
+          <h2 class="section-title" style="text-align:left;font-size:1.5rem">Compose & Generate</h2>
+        </div>
+
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <label for="text-input" class="text-sm font-medium" style="color:var(--muted)">Enter your text</label>
+          <span class="text-xs" style="color:var(--muted)">Ctrl+Enter · generate &nbsp;|&nbsp; Ctrl+Shift+Enter · compare</span>
+        </div>
+        <div class="textarea-wrap">
+          <div class="textarea-glow"></div>
+          <textarea id="text-input" rows="5" maxlength="5000"
+            placeholder="Write something emotional — a story, a message, a monologue..."></textarea>
+        </div>
+        <div class="flex flex-wrap gap-4 mt-2 text-xs" style="color:var(--muted)">
+          <span><span id="char-count">0</span> characters</span>
+          <span><span id="word-count">0</span> words</span>
+          <span><span id="sentence-count">0</span> sentences</span>
+        </div>
+
+        <!-- Live emotion preview -->
+        <div class="live-preview" id="live-preview">
+          <span class="live-preview-emoji" id="live-emoji"></span>
+          <span class="live-preview-text" id="live-text">Start typing to see a live emotion hint...</span>
+        </div>
+
+        <div class="mt-5">
+          <p class="text-xs mb-2 uppercase tracking-wider" style="color:var(--muted)">Sample texts — all 7 emotions</p>
+          <div class="sample-grid">
+            <button class="sample-btn" data-sample="joy"></button>
+            <button class="sample-btn" data-sample="sadness"></button>
+            <button class="sample-btn" data-sample="anger"></button>
+            <button class="sample-btn" data-sample="fear"></button>
+            <button class="sample-btn" data-sample="surprise"></button>
+            <button class="sample-btn" data-sample="disgust"></button>
+            <button class="sample-btn" data-sample="neutral"></button>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <p class="text-xs mb-2 uppercase tracking-wider" style="color:var(--muted)">Override detected emotion</p>
+          <div id="emotion-picker" class="emotion-picker"></div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button id="btn-analyze" class="btn btn-secondary">Analyze Emotion</button>
+          <button id="btn-generate" class="btn btn-primary">Generate Voice</button>
+        </div>
+        <button id="btn-compare" class="btn btn-compare mt-3">
+          Compare Flat vs Emotional — Side-by-Side Analysis
+        </button>
+      </section>
+
+      <!-- Loading -->
+      <section id="loading-section" class="hidden-section glass p-8 reveal">
+        <div class="loader-steps">
+          <div class="loader-step" id="step-analyze"><div class="step-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div><span class="step-label">Analyze</span></div>
+          <div class="loader-step" id="step-modulate"><div class="step-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 14v4M8 10v8M12 6v12M16 10v8M20 14v4"/></svg></div><span class="step-label">Modulate</span></div>
+          <div class="loader-step" id="step-synthesize"><div class="step-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/></svg></div><span class="step-label">Synthesize</span></div>
+        </div>
+        <div class="loader-bar"><div class="loader-bar-fill" id="loader-bar-fill"></div></div>
+        <p id="loading-message" class="text-center text-sm mt-4" style="color:var(--muted)">Processing...</p>
+      </section>
+
+      <!-- Analysis -->
+      <section id="analysis-section" class="hidden-section glass glass-glow p-6 md:p-8 reveal">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <span class="section-tag">Results</span>
+            <h2 class="section-title" style="text-align:left;font-size:1.5rem;margin-top:0.25rem">Emotion Analysis</h2>
+          </div>
+          <button id="btn-export" class="pick-btn">📥 Export Report</button>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-center gap-8 mb-8">
+          <div class="emotion-ring-wrap">
+            <div class="emotion-glow" id="emotion-glow" style="background:#e879a9"></div>
+            <svg width="150" height="150" viewBox="0 0 120 120">
+              <circle class="ring-bg" cx="60" cy="60" r="54"/>
+              <circle class="ring-fill" id="confidence-ring" cx="60" cy="60" r="54"
+                stroke="#e879a9" stroke-dasharray="339.292" stroke-dashoffset="339.292"/>
+            </svg>
+            <div class="emotion-center">
+              <img id="emotion-emoji" class="emotion-emoji-lg emo-img" src="" alt="emotion" />
+            </div>
+          </div>
+          <div class="text-center md:text-left flex-1">
+            <h3 id="emotion-name" class="text-3xl font-bold capitalize mb-2">neutral</h3>
+            <span id="intensity-badge" class="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">medium</span>
+            <div class="mt-4 flex justify-between text-sm max-w-xs">
+              <span style="color:var(--muted)">Confidence</span>
+              <span id="confidence-value" class="font-bold text-xl">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-8">
+          <h3 class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">Emotion Spectrum · Click to Override</h3>
+          <div id="emotion-grid" class="emotion-grid"></div>
+        </div>
+
+        <div class="chart-grid mb-8">
+          <div class="chart-panel">
+            <div class="chart-panel-header"><span class="chart-panel-title">Emotion Distribution</span><span class="chart-panel-badge">Radar</span></div>
+            <div class="chart-panel-body"><canvas id="radar-chart" height="260"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-panel-header"><span class="chart-panel-title">Confidence Scores</span><span class="chart-panel-badge">Bar</span></div>
+            <div class="chart-panel-body"><canvas id="bar-chart" height="260"></canvas></div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-panel-header"><span class="chart-panel-title">Composition</span><span class="chart-panel-badge">Donut</span></div>
+            <div class="chart-panel-body"><canvas id="doughnut-chart" height="260"></canvas></div>
+          </div>
+        </div>
+
+        <div class="mb-8">
+          <h3 class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">Emotion Heatmap</h3>
+          <div id="text-heatmap" class="text-heatmap"></div>
+        </div>
+
+        <div class="mb-8">
+          <h3 class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">Sentence Timeline</h3>
+          <div id="timeline" class="timeline"></div>
+        </div>
+
+        <div class="glass p-5 rounded-xl" style="background:rgba(0,0,0,0.18)">
+          <h3 class="text-xs font-semibold uppercase tracking-wider mb-4" style="color:var(--muted)">Voice Parameters</h3>
+          <div class="gauge-grid">
+            <div class="gauge-item"><div class="gauge-ring"><svg width="84" height="84" viewBox="0 0 80 80"><circle fill="none" stroke="rgba(255,240,235,0.06)" stroke-width="6" cx="40" cy="40" r="34"/><circle fill="none" stroke-width="6" cx="40" cy="40" r="34" stroke-linecap="round" id="gauge-speed-ring" stroke="#e879a9" stroke-dasharray="213.628" stroke-dashoffset="213.628" style="transform:rotate(-90deg);transform-origin:center"/></svg><div class="gauge-val" id="gauge-speed-val">1.0×</div></div><div class="gauge-label">Speed</div></div>
+            <div class="gauge-item"><div class="gauge-ring"><svg width="84" height="84" viewBox="0 0 80 80"><circle fill="none" stroke="rgba(255,240,235,0.06)" stroke-width="6" cx="40" cy="40" r="34"/><circle fill="none" stroke-width="6" cx="40" cy="40" r="34" stroke-linecap="round" id="gauge-pitch-ring" stroke="#d4a574" stroke-dasharray="213.628" stroke-dashoffset="106.814" style="transform:rotate(-90deg);transform-origin:center"/></svg><div class="gauge-val" id="gauge-pitch-val">0</div></div><div class="gauge-label">Pitch</div></div>
+            <div class="gauge-item"><div class="gauge-ring"><svg width="84" height="84" viewBox="0 0 80 80"><circle fill="none" stroke="rgba(255,240,235,0.06)" stroke-width="6" cx="40" cy="40" r="34"/><circle fill="none" stroke-width="6" cx="40" cy="40" r="34" stroke-linecap="round" id="gauge-volume-ring" stroke="#a8c686" stroke-dasharray="213.628" stroke-dashoffset="106.814" style="transform:rotate(-90deg);transform-origin:center"/></svg><div class="gauge-val" id="gauge-volume-val">0</div></div><div class="gauge-label">Volume</div></div>
+            <div class="gauge-item"><div class="gauge-ring"><svg width="84" height="84" viewBox="0 0 80 80"><circle fill="none" stroke="rgba(255,240,235,0.06)" stroke-width="6" cx="40" cy="40" r="34"/><circle fill="none" stroke-width="6" cx="40" cy="40" r="34" stroke-linecap="round" id="gauge-pause-ring" stroke="#c9958a" stroke-dasharray="213.628" stroke-dashoffset="106.814" style="transform:rotate(-90deg);transform-origin:center"/></svg><div class="gauge-val" id="gauge-pause-val">1.0×</div></div><div class="gauge-label">Pauses</div></div>
+          </div>
+          <div class="mt-5 p-4 rounded-lg" style="background:rgba(255,240,235,0.03)">
+            <p class="text-xs uppercase tracking-wider mb-1" style="color:var(--muted)">Why this voice?</p>
+            <p id="voice-description" class="text-sm leading-relaxed" style="color:#dcc8c0"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Audio -->
+      <section id="audio-section" class="hidden-section glass glass-glow p-6 md:p-8 reveal">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="section-title" style="font-size:1.5rem;text-align:left">Audio Output</h2>
+          <span id="processing-time-badge" class="text-xs px-3 py-1 rounded-full" style="background:rgba(168,198,134,0.12);color:#a8c686;border:1px solid rgba(168,198,134,0.25)"></span>
+        </div>
+        <div id="single-player-container">
+          <div class="custom-player glass rounded-xl overflow-hidden">
+            <div id="player-gradient" class="p-5" style="background:linear-gradient(135deg,rgba(232,121,169,0.25),rgba(212,165,116,0.15))">
+              <canvas id="waveform-canvas" class="waveform-canvas"></canvas>
+              <div class="flex items-center gap-4 mt-4">
+                <button id="btn-play" class="play-btn" aria-label="Play">▶</button>
+                <div class="flex-1">
+                  <input type="range" id="seek-bar" min="0" max="100" value="0" class="w-full" style="accent-color:#e879a9" />
+                  <div class="flex justify-between text-xs mt-1" style="color:var(--muted)">
+                    <span id="time-current">0:00</span><span id="time-duration">0:00</span>
+                  </div>
+                </div>
+                <a id="btn-download" href="#" download class="btn btn-secondary" style="padding:0.5rem 1rem;font-size:0.8rem">⬇ Download</a>
+              </div>
+              <p id="audio-filename" class="text-xs mt-3" style="color:var(--muted)"></p>
+            </div>
+          </div>
+        </div>
+        <div id="compare-players" class="hidden-section">
+          <div class="ab-slider-wrap mb-4">
+            <input type="range" id="ab-slider" class="ab-slider" min="0" max="100" value="50" />
+            <div class="ab-labels"><span>🤖 Flat / Robotic</span><span>❤️ Emotional / Empathetic</span></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="custom-player glass rounded-xl overflow-hidden">
+              <div class="p-4" style="background:rgba(255,240,235,0.03)">
+                <p class="text-sm font-semibold mb-3" style="color:var(--muted)">🤖 Flat / Robotic</p>
+                <canvas id="waveform-flat" class="waveform-canvas"></canvas>
+                <div class="flex items-center gap-3 mt-3">
+                  <button id="btn-play-flat" class="play-btn" style="width:44px;height:44px;font-size:1rem">▶</button>
+                  <input type="range" id="seek-flat" min="0" max="100" value="0" class="flex-1" />
+                  <a id="download-flat" href="#" download class="pick-btn">⬇</a>
+                </div>
+              </div>
+            </div>
+            <div class="custom-player glass rounded-xl overflow-hidden">
+              <div id="compare-emotional-gradient" class="p-4" style="background:linear-gradient(135deg,rgba(232,121,169,0.25),rgba(212,165,116,0.15))">
+                <p class="text-sm font-semibold mb-3">❤️ Emotional / Empathetic</p>
+                <canvas id="waveform-emotional" class="waveform-canvas"></canvas>
+                <div class="flex items-center gap-3 mt-3">
+                  <button id="btn-play-emotional" class="play-btn" style="width:44px;height:44px;font-size:1rem">▶</button>
+                  <input type="range" id="seek-emotional" min="0" max="100" value="0" class="flex-1" style="accent-color:#e879a9" />
+                  <a id="download-emotional" href="#" download class="pick-btn">⬇</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SSML -->
+      <section id="ssml-section" class="hidden-section glass p-6 md:p-8 reveal">
+        <button id="ssml-toggle" class="w-full flex items-center justify-between text-left bg-transparent border-none cursor-pointer" style="color:var(--text)">
+          <h2 class="section-title" style="font-size:1.25rem;text-align:left">SSML Preview</h2>
+          <span id="ssml-chevron" style="color:var(--muted)">▼</span>
+        </button>
+        <div id="ssml-content" class="hidden-section mt-4">
+          <div class="rounded-xl p-4" style="background:rgba(0,0,0,0.35);border:1px solid rgba(232,180,184,0.06)">
+            <pre id="ssml-code" class="ssml-code"></pre>
+          </div>
+          <button id="btn-copy-ssml" class="btn btn-secondary mt-3" style="font-size:0.85rem">📋 Copy SSML</button>
+        </div>
+      </section>
+
+      <!-- Technology Stack -->
+      <section id="features" class="glass p-6 md:p-8 reveal">
+        <div class="section-header">
+          <span class="section-tag">Technology Stack</span>
+          <h2 class="section-title">Enterprise-Grade Architecture</h2>
+          <p style="color:var(--muted);font-size:0.85rem;max-width:36rem;margin:0.75rem auto 0;line-height:1.6">Production pipeline combining transformer-based NLP, real-time audio synthesis, and analytics-grade visualizations.</p>
+        </div>
+        <div class="tech-row">
+          <div class="tech-cell"><div class="tech-cell-name">FastAPI</div><div class="tech-cell-desc">Async REST API with automatic OpenAPI documentation and CORS middleware.</div><span class="tech-cell-tag">Backend</span></div>
+          <div class="tech-cell"><div class="tech-cell-name">DistilRoBERTa</div><div class="tech-cell-desc">j-hartmann/emotion-english-distilroberta-base — 7-class fine-tuned transformer.</div><span class="tech-cell-tag">NLP Model</span></div>
+          <div class="tech-cell"><div class="tech-cell-name">gTTS + pydub</div><div class="tech-cell-desc">Cloud TTS synthesis with frame-rate pitch, speed, and volume post-processing.</div><span class="tech-cell-tag">Audio Engine</span></div>
+          <div class="tech-cell"><div class="tech-cell-name">Chart.js Analytics</div><div class="tech-cell-desc">Radar, bar, and doughnut charts with professional dashboard styling.</div><span class="tech-cell-tag">Visualization</span></div>
+          <div class="tech-cell"><div class="tech-cell-name">Web Audio API</div><div class="tech-cell-desc">Real-time frequency analysis and waveform rendering during playback.</div><span class="tech-cell-tag">Frontend</span></div>
+          <div class="tech-cell"><div class="tech-cell-name">SSML Generator</div><div class="tech-cell-desc">Prosody, emphasis, break, and say-as markup for TTS engine compatibility.</div><span class="tech-cell-tag">Speech Layer</span></div>
+        </div>
+      </section>
+
+      <!-- Capabilities -->
+      <section class="glass p-6 md:p-8 reveal">
+        <div class="section-header">
+          <span class="section-tag">Platform Capabilities</span>
+          <h2 class="section-title">Why The Empathy Engine</h2>
+        </div>
+        <div class="pro-grid">
+          <div class="pro-feature">
+            <div class="pro-icon"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 2.5-1.2 4.7-3 6.1V18a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.9A7 7 0 0112 2z"/><path d="M9 22h6"/></svg></div>
+            <h3>7-Emotion Transformer Classification</h3>
+            <p>DistilRoBERTa fine-tuned model detects joy, anger, sadness, fear, surprise, disgust, and neutral — far beyond binary sentiment analysis.</p>
+            <div class="pro-metric">Accuracy: confidence-scored per class</div>
+          </div>
+          <div class="pro-feature">
+            <div class="pro-icon"><svg viewBox="0 0 24 24"><path d="M4 14v4M8 10v8M12 6v12M16 10v8M20 14v4"/></svg></div>
+            <h3>Multi-Parameter Voice Modulation</h3>
+            <p>Speed, pitch shift, volume dB, and inter-sentence pause length are computed from emotion mapping and scaled by detection confidence.</p>
+            <div class="pro-metric">4 vocal parameters · intensity scaling</div>
+          </div>
+          <div class="pro-feature">
+            <div class="pro-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+            <h3>A/B Comparative Analysis</h3>
+            <p>Generate flat neutral speech and emotionally modulated speech from identical input. Crossfade slider enables direct perceptual comparison.</p>
+            <div class="pro-metric">Signature differentiator</div>
+          </div>
+          <div class="pro-feature">
+            <div class="pro-icon"><svg viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg></div>
+            <h3>Analytics Dashboard</h3>
+            <p>Professional radar, bar, and donut charts. Sentence-level heatmap and timeline provide granular emotional trajectory analysis.</p>
+            <div class="pro-metric">3 chart types · heatmap · timeline</div>
+          </div>
+          <div class="pro-feature">
+            <div class="pro-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></div>
+            <h3>Manual Emotion Override</h3>
+            <p>Force any of the seven emotions before synthesis. Useful for controlled demos, QA testing, and creative voice direction.</p>
+            <div class="pro-metric">Override API + UI picker</div>
+          </div>
+          <div class="pro-feature">
+            <div class="pro-icon"><svg viewBox="0 0 24 24"><path d="M8 4h8l2 4H6l2-4zM6 8h12v12H6V8z"/><path d="M9 12h6M9 16h4"/></svg></div>
+            <h3>SSML Markup Generation</h3>
+            <p>Auto-generated Speech Synthesis Markup Language with prosody tags, emphasis levels, break timing, and say-as annotations.</p>
+            <div class="pro-metric">Export-ready SSML output</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Use Cases -->
+      <section class="glass p-6 md:p-8 reveal">
+        <div class="section-header">
+          <span class="section-tag">Industry Applications</span>
+          <h2 class="section-title">Deployment Scenarios</h2>
+        </div>
+        <div class="usecase-grid">
+          <div class="usecase-card">
+            <div class="usecase-industry">Accessibility · HCI</div>
+            <p>Screen readers and assistive technologies gain emotional context, transforming flat narration into empathetic communication for visually impaired users.</p>
+            <cite>WCAG-compliant voice enhancement research</cite>
+          </div>
+          <div class="usecase-card">
+            <div class="usecase-industry">Conversational AI · Voice UX</div>
+            <p>Chatbots and virtual assistants modulate tone based on detected user sentiment, improving engagement and perceived empathy in customer interactions.</p>
+            <cite>Enterprise voice interface design</cite>
+          </div>
+          <div class="usecase-card">
+            <div class="usecase-industry">Digital Publishing · Media</div>
+            <p>Audiobook and podcast production with per-sentence emotional adaptation — narration that shifts tone dynamically throughout content.</p>
+            <cite>Automated content narration pipelines</cite>
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works — Detailed Pipeline -->
+      <section id="how-it-works" class="glass p-6 md:p-8 reveal">
+        <div class="section-header">
+          <span class="section-tag">Processing Pipeline</span>
+          <h2 class="section-title">How It Works</h2>
+          <p style="color:var(--muted);font-size:0.85rem;max-width:40rem;margin:0.75rem auto 0;line-height:1.6">Six-stage pipeline from raw text input to emotionally modulated audio output with full analytics.</p>
+        </div>
+        <div class="pipeline">
+          <div class="pipeline-step">
+            <div class="pipeline-num">01</div>
+            <div class="pipeline-content">
+              <div class="pipeline-sub">Stage 1 · Input</div>
+              <h3>Text Acquisition &amp; Preprocessing</h3>
+              <p>User text is received via the Emotion Studio interface or REST API. Input is validated (1–5000 characters), tokenized into sentences using NLTK punkt, and character/word/sentence metrics are computed for the UI.</p>
+              <ul class="pipeline-bullets">
+                <li>NLTK sentence tokenization for per-sentence analysis</li>
+                <li>Sample corpus available for all 7 emotion categories</li>
+                <li>Optional manual emotion override before processing</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="pipeline-num">02</div>
+            <div class="pipeline-content">
+              <div class="pipeline-sub">Stage 2 · Classification</div>
+              <h3>Neural Emotion Classification</h3>
+              <p>The j-hartmann/emotion-english-distilroberta-base transformer model performs inference on the full text and each individual sentence, returning calibrated probability scores across all seven emotion classes.</p>
+              <ul class="pipeline-bullets">
+                <li>DistilRoBERTa architecture — 66M parameters, ~250MB model</li>
+                <li>Primary emotion + confidence score (0.0–1.0)</li>
+                <li>VADER sentiment fallback if transformers unavailable</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="pipeline-num">03</div>
+            <div class="pipeline-content">
+              <div class="pipeline-sub">Stage 3 · Mapping</div>
+              <h3>Intensity Scoring &amp; Voice Mapping</h3>
+              <p>Detection confidence linearly scales vocal parameters from neutral baseline. Each emotion defines speed, pitch shift (semitones), volume (dB), and pause factor values that are intensity-scaled before synthesis.</p>
+              <ul class="pipeline-bullets">
+                <li>At confidence 0.5 → 50% modulation applied</li>
+                <li>At confidence 1.0 → 100% modulation applied</li>
+                <li>Intensity labels: low (&lt;0.4), medium (0.4–0.7), high (&gt;0.7)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="pipeline-num">04</div>
+            <div class="pipeline-content">
+              <div class="pipeline-sub">Stage 4 · Markup</div>
+              <h3>SSML Generation &amp; Voice Parameters</h3>
+              <p>Speech Synthesis Markup Language is constructed with prosody tags, emphasis on high-weight tokens, inter-sentence break timing, and per-sentence prosody when emotions differ across sentences.</p>
+              <ul class="pipeline-bullets">
+                <li>&lt;prosody&gt; rate, pitch, volume modulation tags</li>
+                <li>&lt;emphasis&gt; on ALL-CAPS and emotion keywords</li>
+                <li>Dashboard gauges display computed vocal parameters</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="pipeline-num">05</div>
+            <div class="pipeline-content">
+              <div class="pipeline-sub">Stage 5 · Synthesis</div>
+              <h3>Speech Synthesis &amp; Audio Post-Processing</h3>
+              <p>Google Text-to-Speech generates base audio per sentence. pydub applies frame-rate speed changes, pitch shifting, volume adjustment, and configurable silence gaps between sentences.</p>
+              <ul class="pipeline-bullets">
+                <li>Per-sentence synthesis with individual emotion params</li>
+                <li>ffmpeg-powered MP3 encoding via imageio-ffmpeg</li>
+                <li>UUID filenames with automatic cache rotation (10 files)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="pipeline-num">06</div>
+            <div class="pipeline-content">
+              <div class="pipeline-sub">Stage 6 · Delivery</div>
+              <h3>Analytics, Playback &amp; Export</h3>
+              <p>Results are delivered through dashboard charts, heatmap visualization, sentence timeline, custom audio player with live waveform, JSON report export, and A/B comparison mode.</p>
+              <ul class="pipeline-bullets">
+                <li>Radar, bar, and donut charts update in real time</li>
+                <li>Compare endpoint generates flat vs emotional audio pair</li>
+                <li>Processing time displayed in milliseconds</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section id="faq" class="glass p-6 md:p-8 reveal">
+        <div class="section-header">
+          <span class="section-tag">Support</span>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item"><button class="faq-q">What emotions can it detect? <span class="faq-chevron">▼</span></button><div class="faq-a">Seven emotions: joy, anger, sadness, fear, surprise, disgust, and neutral — using the j-hartmann/emotion-english-distilroberta-base transformer model.</div></div>
+          <div class="faq-item"><button class="faq-q">How does voice modulation work? <span class="faq-chevron">▼</span></button><div class="faq-a">After emotion detection, speed, pitch, volume, and pause length are adjusted via pydub post-processing on gTTS audio, scaled by detection confidence.</div></div>
+          <div class="faq-item"><button class="faq-q">What is the Compare feature? <span class="faq-chevron">▼</span></button><div class="faq-a">It generates two audio files from the same text — one flat/neutral and one emotionally modulated — so you can hear the difference side by side with a crossfade slider.</div></div>
+          <div class="faq-item"><button class="faq-q">Can I override the detected emotion? <span class="faq-chevron">▼</span></button><div class="faq-a">Yes. Click any emotion in the picker or emotion cards to force that mood before generating voice output.</div></div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="cta-section reveal">
+        <h2 class="cta-title">Ready to Give Your Text a Voice?</h2>
+        <p class="cta-sub">Try the Emotion Studio above — analyze, generate, and compare in seconds.</p>
+        <div class="cta-buttons">
+          <button class="btn btn-primary" onclick="document.getElementById('studio').scrollIntoView({behavior:'smooth'})">Open Studio</button>
+          <button class="btn btn-secondary" id="btn-cta-compare">Run Compare</button>
+        </div>
+      </section>
+
+      <!-- History -->
+      <section id="history-section" class="hidden-section glass p-6 reveal">
+        <h3 class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">Session History</h3>
+        <div id="history-list" class="space-y-2"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="#studio" class="footer-link">Studio</a>
+        <a href="#features" class="footer-link">Technology</a>
+        <a href="#faq" class="footer-link">FAQ</a>
+        <a href="/health" class="footer-link" target="_blank">API Health</a>
+      </div>
+      <p>The Empathy Engine · MIT License · FastAPI + Transformers + gTTS</p>
+    </footer>
+  </div>
+
+  <div id="toast-container"></div>
+  <audio id="audio-main" preload="auto"></audio>
+  <audio id="audio-flat-el" preload="auto"></audio>
+  <audio id="audio-emotional-el" preload="auto"></audio>
+
+  <script src="/assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+transformers
+torch
+vaderSentiment
+gTTS
+pydub
+imageio-ffmpeg
+python-dotenv
+nltk
+requests
