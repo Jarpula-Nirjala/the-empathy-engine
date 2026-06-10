@@ -74,6 +74,8 @@ def _init_services() -> None:
     except Exception as exc:
         logger.exception("Startup failed")
         _startup["error"] = str(exc)
+        # Still mark done so the UI loads; API returns 503 until fixed
+        _startup["done"] = True
     finally:
         _startup["loading"] = False
 

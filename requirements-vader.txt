@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+vaderSentiment
+gTTS
+pydub
+imageio-ffmpeg
+python-dotenv
+nltk
+requests

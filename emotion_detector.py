@@ -6,6 +6,7 @@ Fallback: VADER sentiment analysis
 """
 
 import logging
+import os
 from typing import Any, Optional
 
 import nltk
@@ -41,6 +42,11 @@ class EmotionDetector:
 
     def _load_model(self) -> None:
         """Attempt to load the HuggingFace emotion classifier."""
+        if os.getenv("USE_VADER_ONLY", "").lower() in ("1", "true", "yes"):
+            logger.info("USE_VADER_ONLY enabled — using VADER (no PyTorch/transformers).")
+            self._load_vader()
+            return
+
         try:
             from transformers import pipeline
 

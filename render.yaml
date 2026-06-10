@@ -1,29 +1,23 @@
-# Render Blueprint — https://render.com/docs/blueprint-spec
-# Requires Standard plan (2 GB RAM) — Free/Starter will OOM at runtime.
+# Render Blueprint — Free tier (512 MB) — professional UI + VADER backend
+# For full DistilRoBERTa AI: change dockerfilePath to Dockerfile and plan to standard
 
 services:
   - type: web
     name: the-empathy-engine
     runtime: docker
     region: oregon
-    plan: standard
+    plan: free
     branch: main
-    dockerfilePath: Dockerfile
+    dockerfilePath: Dockerfile.free
     dockerContext: .
     healthCheckPath: /health
     autoDeploy: true
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
-      - key: HF_HOME
-        value: /app/.cache/huggingface
-      - key: TRANSFORMERS_CACHE
-        value: /app/.cache/huggingface
+      - key: USE_VADER_ONLY
+        value: "true"
       - key: NLTK_DATA
         value: /app/.cache/nltk
-      - key: TOKENIZERS_PARALLELISM
-        value: "false"
-      - key: OMP_NUM_THREADS
-        value: "1"
       - key: LOG_LEVEL
         value: INFO
