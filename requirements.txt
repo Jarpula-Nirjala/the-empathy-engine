@@ -1,7 +1,6 @@
 fastapi
 uvicorn[standard]
 transformers
-# torch: installed separately as CPU-only wheel in Dockerfile / build.sh (Render)
 vaderSentiment
 gTTS
 pydub
