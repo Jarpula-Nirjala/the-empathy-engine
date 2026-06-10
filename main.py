@@ -192,6 +192,17 @@ def _build_analysis_response(text: str) -> dict[str, Any]:
     }
 
 
+@app.get("/api/version")
+async def app_version():
+    """Verify the correct build is deployed (professional UI, FastAPI)."""
+    return {
+        "app": "The Empathy Engine",
+        "ui": "professional-v2",
+        "backend": "fastapi",
+        "features": ["charts", "compare", "ssml", "emotion-override"],
+    }
+
+
 @app.get("/")
 @app.head("/")
 async def serve_index():

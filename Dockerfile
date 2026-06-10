@@ -23,8 +23,9 @@ RUN pip install --upgrade pip \
 RUN mkdir -p /app/.cache/nltk /app/.cache/huggingface /app/audio_output \
     && python -c "import nltk; nltk.download('punkt', download_dir='/app/.cache/nltk'); nltk.download('punkt_tab', download_dir='/app/.cache/nltk')"
 
+# Copy full application (static frontend + backend)
 COPY main.py emotion_detector.py emotion_voice_map.py voice_modulator.py ssml_builder.py ./
-COPY static/ static/
+COPY static ./static/
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
